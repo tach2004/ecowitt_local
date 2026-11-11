@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-11-11
+
+### Changed
+- Live data polling can now be configured from **1 to 300 seconds**, both during setup and in the integration options. The default remains 60 seconds. Updated all five supported translations.
+- UV Index entities, including `sensor.ecowitt_uv_index_175da`, now use the explicit `mdi:sun-wireless` icon.
+- Continued the version sequence in the independently maintained `tach2004/ecowitt_local` fork. `AGENTS.md` requires the existing `CLAUDE.md` and `AGENT_SYSTEM_PROMPT.md` instructions, with the user's explicit fork-only PR workflow taking precedence. Existing GitHub Actions and their checks are preserved.
+
+### Fixed
+- Saved polling intervals now take effect: the coordinator reads options before initial configuration, and saving a changed interval reloads the integration. Unrelated entry updates do not trigger an additional options reload.
+- UV Index readings reported under the gateway's hexadecimal `0x17` key now publish an icon, including the existing `sensor.ecowitt_uv_index_175da` entity.
+- Hardware ID, Channel and Signal Strength diagnostics now display dedicated icons instead of Home Assistant's generic eye symbol across sensor devices. Existing entity IDs, unique IDs, readings and dynamic signal-quality icons are preserved.
+
+### Added
+- Regression tests for one-second polling, hexadecimal UV Index mapping and translation fallbacks, bringing full-suite coverage to 100%.
+
 ## [1.11.0] - 2026-10-20
 
 > **Visible change on update** — entity IDs and unique IDs are unchanged, so automations, history and dashboards keep working, and names you set yourself in Home Assistant are kept.

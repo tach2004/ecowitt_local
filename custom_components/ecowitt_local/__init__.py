@@ -81,6 +81,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register services
     await _async_register_services(hass)
 
+    initial_options = entry.options
+
+    async def _async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
+        """Reload only when options change, not when entry metadata changes."""
+        if entry.options != initial_options:
+            await hass.config_entries.async_reload(entry.entry_id)
+
+    entry.async_on_unload(entry.add_update_listener(_async_update_options))
+
     _LOGGER.info("Ecowitt Local integration setup complete")
 
     return True

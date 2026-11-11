@@ -22,7 +22,7 @@
           "include_inactive": "Inclure les capteurs inactifs"
         },
         "data_description": {
-          "scan_interval": "Fréquence d'interrogation des données en direct (30 à 300 secondes)",
+          "scan_interval": "Fréquence d'interrogation des données en direct (1 à 300 secondes)",
           "mapping_interval": "Fréquence de rafraîchissement du mappage des capteurs (300 à 3600 secondes)",
           "include_inactive": "Inclure les capteurs actuellement hors ligne ou sans données"
         }
@@ -62,7 +62,7 @@
           "include_inactive": "Inclure les capteurs inactifs"
         },
         "data_description": {
-          "scan_interval": "Fréquence d'interrogation des données en direct (30 à 300 secondes)",
+          "scan_interval": "Fréquence d'interrogation des données en direct (1 à 300 secondes)",
           "mapping_interval": "Fréquence de rafraîchissement du mappage des capteurs (300 à 3600 secondes)",
           "include_inactive": "Inclure les capteurs actuellement hors ligne ou sans données"
         }

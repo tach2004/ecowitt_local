@@ -22,7 +22,7 @@
           "include_inactive": "Include Inactive Sensors"
         },
         "data_description": {
-          "scan_interval": "How often to poll for live data (30-300 seconds)",
+          "scan_interval": "How often to poll for live data (1-300 seconds)",
           "mapping_interval": "How often to refresh sensor mappings (300-3600 seconds)",
           "include_inactive": "Include sensors that are currently offline or have no data"
         }
@@ -62,7 +62,7 @@
           "include_inactive": "Include Inactive Sensors"
         },
         "data_description": {
-          "scan_interval": "How often to poll for live data (30-300 seconds)",
+          "scan_interval": "How often to poll for live data (1-300 seconds)",
           "mapping_interval": "How often to refresh sensor mappings (300-3600 seconds)",
           "include_inactive": "Include sensors that are currently offline or have no data"
         }

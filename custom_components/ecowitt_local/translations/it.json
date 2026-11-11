@@ -22,7 +22,7 @@
           "include_inactive": "Includi Sensori Inattivi"
         },
         "data_description": {
-          "scan_interval": "Ogni quanto interrogare il Gateway per i dati live (30-300 secondi)",
+          "scan_interval": "Ogni quanto interrogare il Gateway per i dati live (1-300 secondi)",
           "mapping_interval": "Ogni quanto aggiornare il mapping dei sensori (300-3600 secondi)",
           "include_inactive": "Includi i sensori attualmente offline o senza dati"
         }
@@ -62,7 +62,7 @@
           "include_inactive": "Includi Sensori Inattivi"
         },
         "data_description": {
-          "scan_interval": "Ogni quanto interrogare il Gateway per i dati live (30-300 secondi)",
+          "scan_interval": "Ogni quanto interrogare il Gateway per i dati live (1-300 secondi)",
           "mapping_interval": "Ogni quanto aggiornare il mapping dei sensori (300-3600 secondi)",
           "include_inactive": "Includi i sensori attualmente offline o senza dati"
         }

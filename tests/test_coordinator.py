@@ -10,14 +10,42 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import UpdateFailed
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ecowitt_local.api import (
     AuthenticationError,
 )
 from custom_components.ecowitt_local.api import ConnectionError as APIConnectionError
+from custom_components.ecowitt_local.const import DEFAULT_SCAN_INTERVAL, DOMAIN
 from custom_components.ecowitt_local.coordinator import (
     EcowittLocalDataUpdateCoordinator,
 )
+
+
+@pytest.mark.parametrize(
+    ("data", "options", "expected_interval"),
+    [
+        ({"scan_interval": 60}, {"scan_interval": 1}, 1),
+        ({"scan_interval": 30}, {}, 30),
+        ({}, {}, DEFAULT_SCAN_INTERVAL),
+    ],
+)
+async def test_coordinator_uses_saved_polling_options(
+    hass, mock_ecowitt_api, data, options, expected_interval
+):
+    """Saved options override setup data, with data and default fallbacks."""
+    entry = MockConfigEntry(
+        domain=DOMAIN, data={"host": "192.168.1.100", **data}, options=options
+    )
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.ecowitt_local.coordinator.EcowittLocalAPI",
+        return_value=mock_ecowitt_api,
+    ):
+        coordinator = EcowittLocalDataUpdateCoordinator(hass, entry)
+
+    assert coordinator.update_interval == timedelta(seconds=expected_interval)
+    await coordinator.async_shutdown()
 
 
 @pytest.fixture

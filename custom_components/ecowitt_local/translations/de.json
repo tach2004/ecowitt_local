@@ -22,7 +22,7 @@
           "include_inactive": "Inaktive Sensoren einbeziehen"
         },
         "data_description": {
-          "scan_interval": "Wie oft Live-Daten abgefragt werden (30–300 Sekunden)",
+          "scan_interval": "Wie oft Live-Daten abgefragt werden (1–300 Sekunden)",
           "mapping_interval": "Wie oft die Sensorzuordnung aktualisiert wird (300–3600 Sekunden)",
           "include_inactive": "Sensoren einbeziehen, die derzeit offline sind oder keine Daten liefern"
         }
@@ -62,7 +62,7 @@
           "include_inactive": "Inaktive Sensoren einbeziehen"
         },
         "data_description": {
-          "scan_interval": "Wie oft Live-Daten abgefragt werden (30–300 Sekunden)",
+          "scan_interval": "Wie oft Live-Daten abgefragt werden (1–300 Sekunden)",
           "mapping_interval": "Wie oft die Sensorzuordnung aktualisiert wird (300–3600 Sekunden)",
           "include_inactive": "Sensoren einbeziehen, die derzeit offline sind oder keine Daten liefern"
         }
