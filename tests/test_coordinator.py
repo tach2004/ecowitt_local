@@ -10,14 +10,63 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import UpdateFailed
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ecowitt_local.api import (
     AuthenticationError,
 )
 from custom_components.ecowitt_local.api import ConnectionError as APIConnectionError
+from custom_components.ecowitt_local.const import DEFAULT_SCAN_INTERVAL, DOMAIN
 from custom_components.ecowitt_local.coordinator import (
     EcowittLocalDataUpdateCoordinator,
 )
+
+
+@pytest.mark.parametrize(
+    ("data", "options", "expected_interval", "expected_inactive"),
+    [
+        (
+            {"scan_interval": 60, "include_inactive": True},
+            {"scan_interval": 1, "include_inactive": False},
+            1,
+            False,
+        ),
+        ({"scan_interval": 30, "include_inactive": True}, {}, 30, True),
+        ({}, {}, DEFAULT_SCAN_INTERVAL, False),
+    ],
+)
+async def test_coordinator_uses_saved_polling_options(
+    hass, mock_ecowitt_api, data, options, expected_interval, expected_inactive
+):
+    """Saved options override setup data, with data and default fallbacks."""
+    entry = MockConfigEntry(
+        domain=DOMAIN, data={"host": "192.168.1.100", **data}, options=options
+    )
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.ecowitt_local.coordinator.EcowittLocalAPI",
+        return_value=mock_ecowitt_api,
+    ):
+        coordinator = EcowittLocalDataUpdateCoordinator(hass, entry)
+
+    assert coordinator.update_interval == timedelta(seconds=expected_interval)
+    assert coordinator._include_inactive is expected_inactive
+    await coordinator.async_shutdown()
+
+
+async def test_coordinator_uses_saved_mapping_interval(coordinator, hass):
+    """A longer saved mapping interval prevents an early hardware rescan."""
+    hass.config_entries.async_update_entry(
+        coordinator.config_entry, options={"mapping_interval": 3600}
+    )
+    coordinator._last_mapping_update = datetime.now() - timedelta(seconds=700)
+    coordinator._update_sensor_mapping = AsyncMock()
+
+    await EcowittLocalDataUpdateCoordinator._update_sensor_mapping_if_needed(
+        coordinator
+    )
+
+    coordinator._update_sensor_mapping.assert_not_awaited()
 
 
 @pytest.fixture

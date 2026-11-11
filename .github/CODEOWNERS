@@ -1,4 +1,6 @@
-CLAUDE.md @alexlenk
-AGENT_SYSTEM_PROMPT.md @alexlenk
-.github/CODEOWNERS @alexlenk
-.github/workflows/ @alexlenk
+CLAUDE.md @tach2004
+AGENT_SYSTEM_PROMPT.md @tach2004
+AGENTS.md @tach2004
+.github/CODEOWNERS @tach2004
+.github/workflows/ @tach2004
+.github/pull_request_template.md @tach2004

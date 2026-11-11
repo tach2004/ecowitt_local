@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -23,6 +24,21 @@ async def test_setup_entry_success(hass: HomeAssistant, setup_integration):
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
     assert coordinator.config_entry == config_entry
+
+
+async def test_saved_options_reload_polling_interval(hass, setup_integration):
+    """Saving a one-second interval reloads a running entry with that interval."""
+    entry = setup_integration
+    original_coordinator = hass.data[DOMAIN][entry.entry_id]
+    assert original_coordinator.update_interval == timedelta(seconds=60)
+
+    hass.config_entries.async_update_entry(entry, options={"scan_interval": 1})
+    await hass.async_block_till_done()
+
+    assert entry.state == ConfigEntryState.LOADED
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    assert coordinator is not original_coordinator
+    assert coordinator.update_interval == timedelta(seconds=1)
 
 
 async def test_setup_entry_connection_error(
@@ -821,8 +837,13 @@ async def test_migration_gateway_sensor_reassignment(
         original_name=f"Gateway {gateway_sensor_key}",
     )
 
-    # Test migration function
-    result = await async_migrate_entry(hass, entry)
+    # Migration updates the entry and triggers its update listener.
+    with patch(
+        "custom_components.ecowitt_local.coordinator.EcowittLocalAPI",
+        return_value=mock_ecowitt_api,
+    ):
+        result = await async_migrate_entry(hass, entry)
+        await hass.async_block_till_done()
     assert result is True
     assert entry.minor_version == 3
 

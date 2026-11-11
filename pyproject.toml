@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ecowitt_local"
-version = "1.0.0"
+version = "1.12.0"
 description = "Home Assistant custom integration for Ecowitt weather stations via local web interface"
 readme = "README.md"
 license = {text = "MIT"}

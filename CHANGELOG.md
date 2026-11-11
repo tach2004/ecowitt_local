@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-11-11
+
+### Changed
+- Live data polling can now be configured from **1 to 300 seconds**, both during setup and in the integration options. The default remains 60 seconds. Updated all five supported translations.
+- UV Index entities, including `sensor.ecowitt_uv_index_175da`, now use the explicit `mdi:sun-wireless` icon.
+- Continued the version sequence in the independently maintained `tach2004/ecowitt_local` fork. Added fork-specific contributor rules, a PR changelog template, and CI coverage for feature and fix branches.
+- Fork workflow ownership now points to `@tach2004`. Changes to agent instructions are listed in the workflow summary for maintainer review instead of posting an upstream-specific comment and always failing; required approval is configured through GitHub branch protection or rulesets.
+
+### Fixed
+- Saved polling options now take effect: the coordinator reads options before initial configuration, and saving options reloads the integration. Mapping interval and inactive-sensor options follow the same precedence.
+
 ## [1.11.0] - 2026-10-20
 
 > **Visible change on update** — entity IDs and unique IDs are unchanged, so automations, history and dashboards keep working, and names you set yourself in Home Assistant are kept.

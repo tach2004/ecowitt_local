@@ -259,7 +259,7 @@ SENSOR_TYPES: Final[Dict[str, Dict[str, Any]]] = {
         "name": "UV Index",
         "entity_name": "UV Index",
         "unit": "UV Index",
-        "icon": "mdi:weather-sunny-alert",
+        "icon": "mdi:sun-wireless",
     },
     # Lightning sensor
     "lightning_num": {

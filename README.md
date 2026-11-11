@@ -17,7 +17,7 @@ The key feature is **stable entity IDs based on sensor hardware IDs**. When a ba
 - **Each sensor is its own device** — with its own battery level, signal strength, and online status
 - **No internet required** — the integration talks directly to your gateway over your local network
 - **No HTTP exposure** — Home Assistant does not need to be reachable from the gateway
-- **Configurable polling** — choose how often live data and sensor mappings are refreshed
+- **Configurable polling** — refresh live data every 1–300 seconds (default: 60 seconds) and configure sensor mapping refreshes separately
 - **Inactive sensor support** — optionally include sensors that are currently offline
 
 ```

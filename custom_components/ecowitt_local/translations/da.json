@@ -22,7 +22,7 @@
           "include_inactive": "Medtag inaktive sensorer"
         },
         "data_description": {
-          "scan_interval": "Hvor ofte der forespørges efter aktuelle data (30-300 sekunder)",
+          "scan_interval": "Hvor ofte der forespørges efter aktuelle data (1-300 sekunder)",
           "mapping_interval": "Hvor ofte sensorkortlægningen opdateres (300-3600 sekunder)",
           "include_inactive": "Medtag sensorer, der i øjeblikket er offline eller ikke har data"
         }
@@ -62,7 +62,7 @@
           "include_inactive": "Medtag inaktive sensorer"
         },
         "data_description": {
-          "scan_interval": "Hvor ofte der forespørges efter aktuelle data (30-300 sekunder)",
+          "scan_interval": "Hvor ofte der forespørges efter aktuelle data (1-300 sekunder)",
           "mapping_interval": "Hvor ofte sensorkortlægningen opdateres (300-3600 sekunder)",
           "include_inactive": "Medtag sensorer, der i øjeblikket er offline eller ikke har data"
         }

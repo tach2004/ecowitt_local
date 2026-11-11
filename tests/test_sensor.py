@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -10,6 +11,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.entity_component import EntityComponent
 
 from custom_components.ecowitt_local.const import (
     ATTR_BATTERY_LEVEL,
@@ -1130,7 +1132,7 @@ async def test_icon_sensor_types(mock_coordinator):
         ("soilmoisture1", "mdi:sprout"),
         ("leak_ch1", "mdi:water-alert"),
         ("lightning_num", "mdi:flash"),
-        ("uv_index", "mdi:weather-sunny-alert"),
+        ("uv_index", "mdi:sun-wireless"),
         ("heap_usage", "mdi:memory"),
         ("runtime_days", "mdi:clock-outline"),
         ("tempf", None),  # No custom icon
@@ -1154,3 +1156,33 @@ async def test_icon_sensor_types(mock_coordinator):
         )
 
         assert sensor.icon == expected_icon
+
+
+@pytest.mark.parametrize("sensor_key", ["uv", "uv_index"])
+async def test_uv_index_icon_in_home_assistant_state(
+    hass: HomeAssistant, mock_coordinator, sensor_key
+):
+    """Publish the UV icon for the gateway key and the UV Index alias."""
+    sensor_info = {
+        "sensor_key": sensor_key,
+        "hardware_id": "175DA",
+        "category": "sensor",
+        "name": "UV Index",
+        "unit_of_measurement": "UV Index",
+        "state": 3,
+        "attributes": {},
+    }
+    mock_coordinator.get_sensor_data.return_value = sensor_info
+    sensor = EcowittLocalSensor(
+        coordinator=mock_coordinator,
+        entity_id="sensor.ecowitt_uv_index_175da",
+        sensor_info=sensor_info,
+    )
+    component = EntityComponent(logging.getLogger(__name__), "sensor", hass)
+    await component.async_add_entities([sensor])
+
+    state = hass.states.get("sensor.ecowitt_uv_index_175da")
+    assert state is not None
+    assert state.state == "3"
+    assert state.attributes["icon"] == "mdi:sun-wireless"
+    assert sensor.unique_id == f"{DOMAIN}_175DA_{sensor_key}"

@@ -5,7 +5,8 @@ on:
     branches: [main]
 
 permissions:
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
   check-agent-files:
@@ -24,7 +25,7 @@ jobs:
           echo "$CHANGED"
 
           PROTECTED=""
-          for f in CLAUDE.md AGENT_SYSTEM_PROMPT.md .github/CODEOWNERS; do
+          for f in AGENTS.md CLAUDE.md AGENT_SYSTEM_PROMPT.md .github/CODEOWNERS; do
             if echo "$CHANGED" | grep -qx "$f"; then
               PROTECTED="$PROTECTED $f"
             fi
@@ -37,27 +38,20 @@ jobs:
             echo "protected=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Post warning comment
+      - name: Summarize required maintainer review
         if: steps.check.outputs.protected == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROTECTED_FILES: ${{ steps.check.outputs.files }}
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} \
-            --repo "${{ github.repository }}" \
-            --body "## ⚠️ Agent Instruction Files Modified
-
-          This PR modifies files that control the autonomous Claude Code agent:
-          \`\`\`
-          ${{ steps.check.outputs.files }}
-          \`\`\`
-
-          These files define what the agent is allowed to do and how it behaves. Please review these changes carefully before merging — modifying them could alter the agent's behavior in unintended ways.
-
-          @alexlenk manual review required."
-
-      - name: Fail if protected files modified
-        if: steps.check.outputs.protected == 'true'
-        run: |
-          echo "❌ PR modifies agent instruction files: ${{ steps.check.outputs.files }}"
-          echo "Manual review by @alexlenk is required."
-          exit 1
+          {
+            echo "## Agent instruction files modified"
+            echo ""
+            echo "Changed protected files:"
+            for f in $PROTECTED_FILES; do
+              printf -- '- `%s`\n' "$f"
+            done
+            echo ""
+            echo "Maintainer review is required before merging these changes."
+            echo "CODEOWNERS identifies @tach2004 as the reviewer in this fork."
+            echo "This workflow reports changes; required review must be enforced through repository branch protection or rulesets."
+          } >> "$GITHUB_STEP_SUMMARY"
