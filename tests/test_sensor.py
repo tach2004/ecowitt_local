@@ -23,6 +23,9 @@ from custom_components.ecowitt_local.const import (
     ATTR_SIGNAL_STRENGTH,
     DOMAIN,
 )
+from custom_components.ecowitt_local.coordinator import (
+    EcowittLocalDataUpdateCoordinator,
+)
 from custom_components.ecowitt_local.sensor import (
     UNIT_CONVERSIONS,
     EcowittLocalSensor,
@@ -1196,3 +1199,49 @@ async def test_uv_index_icon_in_home_assistant_state(
     assert state.state == "3"
     assert state.attributes["icon"] == "mdi:sun-wireless"
     assert sensor.unique_id == f"{DOMAIN}_175DA_{sensor_key}"
+
+
+@pytest.mark.parametrize(("hardware_id", "channel"), [("175DA", None), ("CB", "1")])
+async def test_generated_diagnostic_icons_in_home_assistant_state(
+    hass: HomeAssistant, mock_coordinator, hardware_id, channel
+):
+    """Hardware diagnostics publish meaningful icons for weather and channel devices."""
+    mock_coordinator.sensor_mapper.get_sensor_info.return_value = {
+        "sensor_type": "wh51" if channel else "wh90",
+        "channel": channel,
+        "signal": "4",
+        "rssi": "-76",
+    }
+    sensors_data = {"sensor.seed": {"hardware_id": hardware_id}}
+    EcowittLocalDataUpdateCoordinator._add_diagnostic_and_signal_sensors(
+        mock_coordinator, sensors_data
+    )
+    sensors_data.pop("sensor.seed")
+    mock_coordinator.get_sensor_data.side_effect = sensors_data.get
+    entities = {
+        entity_id: EcowittLocalSensor(mock_coordinator, entity_id, info)
+        for entity_id, info in sensors_data.items()
+    }
+    component = EntityComponent(logging.getLogger(__name__), "sensor", hass)
+    await component.async_add_entities(list(entities.values()))
+
+    expected_icons = {
+        "hardware_id": "mdi:identifier",
+        "signal_strength": "mdi:signal",
+        "signal_quality": "mdi:signal-cellular-1",
+    }
+    if channel:
+        expected_icons["channel"] = "mdi:numeric"
+    for diagnostic, icon in expected_icons.items():
+        entity_id = f"sensor.ecowitt_{diagnostic}_{hardware_id.lower()}"
+        state = hass.states.get(entity_id)
+        assert state is not None
+        assert state.attributes["icon"] == icon
+        assert state.attributes["hardware_id"] == hardware_id
+        sensor = entities[entity_id]
+        assert sensor.entity_category == EntityCategory.DIAGNOSTIC
+        assert sensor.unique_id == f"{DOMAIN}_{hardware_id}_{sensor._sensor_key}"
+
+    rssi = entities[f"sensor.ecowitt_rssi_{hardware_id.lower()}"]
+    assert rssi.device_class == SensorDeviceClass.SIGNAL_STRENGTH
+    assert rssi.icon is None

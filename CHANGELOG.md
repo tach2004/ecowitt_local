@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Saved polling intervals now take effect: the coordinator reads options before initial configuration, and saving a changed interval reloads the integration. Unrelated entry updates do not trigger an additional options reload.
 - UV Index readings reported under the gateway's hexadecimal `0x17` key now publish an icon, including the existing `sensor.ecowitt_uv_index_175da` entity.
+- Hardware ID, Channel and Signal Strength diagnostics now display dedicated icons instead of Home Assistant's generic eye symbol across sensor devices. Existing entity IDs, unique IDs, readings and dynamic signal-quality icons are preserved.
 
 ### Added
 - Regression tests for one-second polling, hexadecimal UV Index mapping and translation fallbacks, bringing full-suite coverage to 100%.

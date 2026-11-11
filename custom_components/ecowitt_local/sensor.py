@@ -473,6 +473,13 @@ class EcowittLocalSensor(
                     return "mdi:signal-cellular-outline"
             return "mdi:signal-cellular-outline"
 
+        if self._sensor_key.startswith("hardware_id_"):
+            return "mdi:identifier"
+        if self._sensor_key.startswith("channel_"):
+            return "mdi:numeric"
+        if self._sensor_key.startswith("signal_"):
+            return "mdi:signal"
+
         if self._sensor_key in ("uv", "uv_index", "0x17"):
             return str(SENSOR_TYPES["uv"]["icon"])
 
