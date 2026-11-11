@@ -99,9 +99,7 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
         self.sensor_mapper = SensorMapper()
         self._gateway_info: Dict[str, Any] = {}
         self._last_mapping_update: Optional[datetime] = None
-        self._include_inactive = config_entry.options.get(
-            CONF_INCLUDE_INACTIVE, config_entry.data.get(CONF_INCLUDE_INACTIVE, False)
-        )
+        self._include_inactive = config_entry.data.get(CONF_INCLUDE_INACTIVE, False)
         self._gateway_temp_unit: str = (
             "°F"  # default; overridden by get_units_info ("0"=°C, "1"=°F)
         )
@@ -179,9 +177,8 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
     async def _update_sensor_mapping_if_needed(self) -> None:
         """Update sensor mapping if enough time has passed."""
-        mapping_interval = self.config_entry.options.get(
-            CONF_MAPPING_INTERVAL,
-            self.config_entry.data.get(CONF_MAPPING_INTERVAL, DEFAULT_MAPPING_INTERVAL),
+        mapping_interval = self.config_entry.data.get(
+            CONF_MAPPING_INTERVAL, DEFAULT_MAPPING_INTERVAL
         )
 
         now = datetime.now()

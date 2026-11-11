@@ -28,6 +28,7 @@ from custom_components.ecowitt_local.sensor import (
     EcowittLocalSensor,
     async_setup_entry,
 )
+from custom_components.ecowitt_local.sensor_mapper import SensorMapper
 
 
 @pytest.fixture
@@ -1158,16 +1159,25 @@ async def test_icon_sensor_types(mock_coordinator):
         assert sensor.icon == expected_icon
 
 
-@pytest.mark.parametrize("sensor_key", ["uv", "uv_index"])
+@pytest.mark.parametrize(
+    ("sensor_key", "entity_id"),
+    [
+        ("uv", "sensor.ecowitt_uv_175da"),
+        ("uv_index", "sensor.ecowitt_uv_index_175da"),
+        ("0x17", "sensor.ecowitt_uv_index_175da"),
+    ],
+)
 async def test_uv_index_icon_in_home_assistant_state(
-    hass: HomeAssistant, mock_coordinator, sensor_key
+    hass: HomeAssistant, mock_coordinator, sensor_key, entity_id
 ):
-    """Publish the UV icon for the gateway key and the UV Index alias."""
+    """Publish the UV icon for the gateway's hex key and non-hex variants."""
+    mapped_entity_id, name = SensorMapper().generate_entity_id(sensor_key, "175DA")
+    assert mapped_entity_id == entity_id
     sensor_info = {
         "sensor_key": sensor_key,
         "hardware_id": "175DA",
         "category": "sensor",
-        "name": "UV Index",
+        "name": name,
         "unit_of_measurement": "UV Index",
         "state": 3,
         "attributes": {},
@@ -1175,13 +1185,13 @@ async def test_uv_index_icon_in_home_assistant_state(
     mock_coordinator.get_sensor_data.return_value = sensor_info
     sensor = EcowittLocalSensor(
         coordinator=mock_coordinator,
-        entity_id="sensor.ecowitt_uv_index_175da",
+        entity_id=mapped_entity_id,
         sensor_info=sensor_info,
     )
     component = EntityComponent(logging.getLogger(__name__), "sensor", hass)
     await component.async_add_entities([sensor])
 
-    state = hass.states.get("sensor.ecowitt_uv_index_175da")
+    state = hass.states.get(entity_id)
     assert state is not None
     assert state.state == "3"
     assert state.attributes["icon"] == "mdi:sun-wireless"

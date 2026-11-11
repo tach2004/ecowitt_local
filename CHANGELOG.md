@@ -10,11 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Live data polling can now be configured from **1 to 300 seconds**, both during setup and in the integration options. The default remains 60 seconds. Updated all five supported translations.
 - UV Index entities, including `sensor.ecowitt_uv_index_175da`, now use the explicit `mdi:sun-wireless` icon.
-- Continued the version sequence in the independently maintained `tach2004/ecowitt_local` fork. Added fork-specific contributor rules, a PR changelog template, and CI coverage for feature and fix branches.
-- Fork workflow ownership now points to `@tach2004`. Changes to agent instructions are listed in the workflow summary for maintainer review instead of posting an upstream-specific comment and always failing; required approval is configured through GitHub branch protection or rulesets.
+- Continued the version sequence in the independently maintained `tach2004/ecowitt_local` fork. `AGENTS.md` requires the existing `CLAUDE.md` and `AGENT_SYSTEM_PROMPT.md` instructions, with the user's explicit fork-only PR workflow taking precedence. Existing GitHub Actions and their checks are preserved.
 
 ### Fixed
-- Saved polling options now take effect: the coordinator reads options before initial configuration, and saving options reloads the integration. The coordinator also reads saved mapping interval and inactive-sensor settings.
+- Saved polling intervals now take effect: the coordinator reads options before initial configuration, and saving a changed interval reloads the integration. Unrelated entry updates do not trigger an additional options reload.
+- UV Index readings reported under the gateway's hexadecimal `0x17` key now publish an icon, including the existing `sensor.ecowitt_uv_index_175da` entity.
+
+### Added
+- Regression tests for one-second polling, hexadecimal UV Index mapping and translation fallbacks, bringing full-suite coverage to 100%.
 
 ## [1.11.0] - 2026-10-20
 

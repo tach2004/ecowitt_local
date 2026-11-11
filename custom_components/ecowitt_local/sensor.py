@@ -473,8 +473,8 @@ class EcowittLocalSensor(
                     return "mdi:signal-cellular-outline"
             return "mdi:signal-cellular-outline"
 
-        if self._sensor_key in ("uv", "uv_index"):
-            return "mdi:sun-wireless"
+        if self._sensor_key in ("uv", "uv_index", "0x17"):
+            return str(SENSOR_TYPES["uv"]["icon"])
 
         # Use device class icons or custom ones
         sensor_icons = {

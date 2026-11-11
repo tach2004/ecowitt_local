@@ -2,19 +2,14 @@
 
 This directory contains automated workflows for CI/CD and release management.
 
-Fork changes start from the current `main` in `tach2004/ecowitt_local` and use
-`feat/**` or `fix/**` branches with PRs targeting that repository's `main`.
-The inherited `auto-release.yml` workflow publishes a new version after it is
-merged into `main` when its version tag does not already exist.
-
 ## Workflows Overview
 
 ### CI and Validation
 
 #### `ci.yml` - Continuous Integration
-- **Triggers**: Push to main, develop, feat/**, fix/**, bot/**, claude/** branches; PRs to main
+- **Triggers**: Push to main, develop, bot/**, claude/** branches; PRs to main
 - **Jobs**:
-  - Run tests on Python 3.13
+  - Run tests on Python 3.11 and 3.12
   - Linting with flake8
   - Type checking with mypy
   - Code coverage reporting
