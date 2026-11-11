@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Contributor instructions require the target version in new branch names (`<type>/<version>-<short-description>`). Removed the completed v1.12.0 task's fixed branch name; documentation-only changes without a version bump use the current version.
+
 ## [1.12.0] - 2026-11-11
 
 ### Changed

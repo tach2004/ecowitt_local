@@ -19,8 +19,13 @@ vereinbarten Ausnahmen für den Fork:
 - Bei GitHub-Befehlen das Fork-Ziel ausdrücklich angeben: `--repo
   tach2004/ecowitt_local`, wenn unterstützt, sonst vollständige API-Pfade unter
   `repos/tach2004/ecowitt_local`. Keine automatischen Reviewer an Alex anfordern.
-- Für diesen Auftrag bleibt der Branch `feat/1.12.0-fast-polling-uv-icon` und die
-  Version `1.12.0`. Die Versionsnummerierung wird fortgesetzt. PRs offen zur
+- Neue Branches tragen immer die zugehörige Zielversion im Namen:
+  `<typ>/<version>-<kurze-beschreibung>`, beispielsweise
+  `feat/1.13.0-neue-funktion` oder `fix/1.12.1-fehlerbeschreibung`.
+  Bei einer geänderten Zielversion auch den Branchnamen entsprechend anpassen.
+  Reine Dokumentationsänderungen ohne Versionssprung werden der aktuellen
+  Version zugeordnet, beispielsweise `docs/1.12.0-branch-naming`.
+  Die Versionsnummerierung wird fortgesetzt. PRs offen zur
   Prüfung lassen; nicht eigenständig mergen, taggen oder veröffentlichen. Damit
   gelten die abweichenden Bot-Vorgaben zu `claude/release-*`, automatischem Merge
   und sofortiger Veröffentlichung hier nicht.
