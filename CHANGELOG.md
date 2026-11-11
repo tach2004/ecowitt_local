@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fork workflow ownership now points to `@tach2004`. Changes to agent instructions are listed in the workflow summary for maintainer review instead of posting an upstream-specific comment and always failing; required approval is configured through GitHub branch protection or rulesets.
 
 ### Fixed
-- Saved polling options now take effect: the coordinator reads options before initial configuration, and saving options reloads the integration. Mapping interval and inactive-sensor options follow the same precedence.
+- Saved polling options now take effect: the coordinator reads options before initial configuration, and saving options reloads the integration. The coordinator also reads saved mapping interval and inactive-sensor settings.
 
 ## [1.11.0] - 2026-10-20
 
