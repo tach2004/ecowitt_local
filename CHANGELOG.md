@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.1] - 2026-11-13
+
+### Fixed
+- **WH51 soil moisture battery no longer drops to 10%**: gateways such as the GW1100A (firmware V2.4.5) report the WH51 battery in the `ch_soil` block as a 0-5 bar level, not the spec's 0/1 flag. A reading of `"1"` was shown as 10%, so a sensor on 2 bars jumped between 40% and 10% and set off low-battery alerts. `"1"` is now one bar (20%), like `"2"`-`"5"`; `"0"` stays 100% (issue #290).
 ## [Unreleased]
 
 ### Changed
