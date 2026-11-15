@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
+import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -88,7 +89,10 @@ async def test_form_cannot_connect(hass: HomeAssistant, mock_ecowitt_api) -> Non
     assert result2["errors"] == {"base": "cannot_connect"}
 
 
-async def test_options_flow(hass: HomeAssistant, mock_config_entry) -> None:
+@pytest.mark.parametrize("scan_interval", [1, 30, 300])
+async def test_options_flow(
+    hass: HomeAssistant, mock_config_entry, scan_interval: int
+) -> None:
     """Test options flow."""
     mock_config_entry.add_to_hass(hass)
 
@@ -100,16 +104,50 @@ async def test_options_flow(hass: HomeAssistant, mock_config_entry) -> None:
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         user_input={
-            "scan_interval": 30,
+            "scan_interval": scan_interval,
             "mapping_interval": 300,
             "include_inactive": True,
         },
     )
 
     assert result["type"] == FlowResultType.CREATE_ENTRY
-    assert result["data"]["scan_interval"] == 30
+    assert result["data"]["scan_interval"] == scan_interval
     assert result["data"]["mapping_interval"] == 300
     assert result["data"]["include_inactive"] is True
+
+
+@pytest.mark.parametrize("flow_type", ["setup", "options"])
+async def test_poll_interval_form_boundaries(
+    hass: HomeAssistant, mock_config_entry, mock_ecowitt_api, flow_type: str
+) -> None:
+    """Both forms allow one-second polling and retain the other interval bounds."""
+    if flow_type == "options":
+        mock_config_entry.add_to_hass(hass)
+        result = await hass.config_entries.options.async_init(
+            mock_config_entry.entry_id
+        )
+    else:
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        with patch(
+            "custom_components.ecowitt_local.config_flow.EcowittLocalAPI",
+            return_value=mock_ecowitt_api,
+        ):
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"], {CONF_HOST: "192.168.1.100"}
+            )
+
+    assert result["type"] == FlowResultType.FORM
+    schema = result["data_schema"]
+    for interval in (1, 29, 30, 300):
+        assert schema({"scan_interval": interval})["scan_interval"] == interval
+    for interval in (-1, 0, 301):
+        with pytest.raises(vol.Invalid):
+            schema({"scan_interval": interval})
+    for interval in (299, 3601):
+        with pytest.raises(vol.Invalid):
+            schema({"mapping_interval": interval})
 
 
 async def test_options_flow_no_config_entry_setter_error(
@@ -582,7 +620,10 @@ async def test_reconfigure_flow_same_device_new_ip(
     assert updated_entry.unique_id == "24:4c:ab:6c:37:d1"
 
 
-async def test_complete_flow(hass: HomeAssistant, mock_ecowitt_api) -> None:
+@pytest.mark.parametrize("scan_interval", [1, 60, 300])
+async def test_complete_flow(
+    hass: HomeAssistant, mock_ecowitt_api, scan_interval: int
+) -> None:
     """Test complete configuration flow."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -608,7 +649,7 @@ async def test_complete_flow(hass: HomeAssistant, mock_ecowitt_api) -> None:
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {
-                "scan_interval": 60,
+                "scan_interval": scan_interval,
                 "mapping_interval": 600,
                 "include_inactive": False,
             },
@@ -618,4 +659,4 @@ async def test_complete_flow(hass: HomeAssistant, mock_ecowitt_api) -> None:
     assert result["title"] == "Ecowitt Gateway (192.168.1.100)"
     assert result["data"][CONF_HOST] == "192.168.1.100"
     assert result["data"][CONF_PASSWORD] == "test_password"
-    assert result["data"]["scan_interval"] == 60
+    assert result["data"]["scan_interval"] == scan_interval

@@ -5,10 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.11.1] - 2026-11-13
+## [1.12.1] - 2026-11-13
 
 ### Fixed
 - **WH51 soil moisture battery no longer drops to 10%**: gateways such as the GW1100A (firmware V2.4.5) report the WH51 battery in the `ch_soil` block as a 0-5 bar level, not the spec's 0/1 flag. A reading of `"1"` was shown as 10%, so a sensor on 2 bars jumped between 40% and 10% and set off low-battery alerts. `"1"` is now one bar (20%), like `"2"`-`"5"`; `"0"` stays 100% (issue #290).
+## [Unreleased]
+
+### Changed
+- Contributor instructions require the target version in new branch names (`<type>/<version>-<short-description>`). Removed the completed v1.12.0 task's fixed branch name; documentation-only changes without a version bump use the current version.
+
+## [1.12.0] - 2026-11-11
+
+### Changed
+- Live data polling can now be configured from **1 to 300 seconds**, both during setup and in the integration options. The default remains 60 seconds. Updated all five supported translations.
+- UV Index entities, including `sensor.ecowitt_uv_index_175da`, now use the explicit `mdi:sun-wireless` icon.
+- Continued the version sequence in the independently maintained `tach2004/ecowitt_local` fork. `AGENTS.md` requires the existing `CLAUDE.md` and `AGENT_SYSTEM_PROMPT.md` instructions, with the user's explicit fork-only PR workflow taking precedence. Existing GitHub Actions and their checks are preserved.
+
+### Fixed
+- Saved polling intervals now take effect: the coordinator reads options before initial configuration, and saving a changed interval reloads the integration. Unrelated entry updates do not trigger an additional options reload.
+- UV Index readings reported under the gateway's hexadecimal `0x17` key now publish an icon, including the existing `sensor.ecowitt_uv_index_175da` entity.
+- Hardware ID, Channel and Signal Strength diagnostics now display dedicated icons instead of Home Assistant's generic eye symbol across sensor devices. Existing entity IDs, unique IDs, readings and dynamic signal-quality icons are preserved.
+
+### Added
+- Regression tests for one-second polling, hexadecimal UV Index mapping and translation fallbacks, bringing full-suite coverage to 100%.
 
 ## [1.11.0] - 2026-10-20
 

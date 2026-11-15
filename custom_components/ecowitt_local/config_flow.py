@@ -45,7 +45,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 STEP_OPTIONS_DATA_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
-            int, vol.Range(min=30, max=300)
+            int, vol.Range(min=1, max=300)
         ),
         vol.Optional(CONF_MAPPING_INTERVAL, default=DEFAULT_MAPPING_INTERVAL): vol.All(
             int, vol.Range(min=300, max=3600)
@@ -202,7 +202,7 @@ class ConfigFlow(config_entries.ConfigFlow):
             step_id="options",
             data_schema=STEP_OPTIONS_DATA_SCHEMA,
             description_placeholders={
-                "scan_interval_desc": "How often to poll for live data (30-300 seconds)",
+                "scan_interval_desc": "How often to poll for live data (1-300 seconds)",
                 "mapping_interval_desc": "How often to refresh sensor mappings (5-60 minutes)",
                 "inactive_desc": "Include sensors that are currently offline",
             },
@@ -330,7 +330,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             {
                 vol.Optional(
                     CONF_SCAN_INTERVAL, default=current_scan_interval
-                ): vol.All(int, vol.Range(min=30, max=300)),
+                ): vol.All(int, vol.Range(min=1, max=300)),
                 vol.Optional(
                     CONF_MAPPING_INTERVAL, default=current_mapping_interval
                 ): vol.All(int, vol.Range(min=300, max=3600)),
@@ -344,7 +344,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=options_schema,
             description_placeholders={
-                "scan_interval_desc": "How often to poll for live data (30-300 seconds)",
+                "scan_interval_desc": "How often to poll for live data (1-300 seconds)",
                 "mapping_interval_desc": "How often to refresh sensor mappings (5-60 minutes)",
                 "inactive_desc": "Include sensors that are currently offline",
             },

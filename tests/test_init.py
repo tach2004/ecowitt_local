@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -23,6 +24,65 @@ async def test_setup_entry_success(hass: HomeAssistant, setup_integration):
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     assert coordinator is not None
     assert coordinator.config_entry == config_entry
+
+
+async def test_saved_options_reload_polling_interval(hass, setup_integration):
+    """Saving a one-second interval reloads a running entry with that interval."""
+    entry = setup_integration
+    original_coordinator = hass.data[DOMAIN][entry.entry_id]
+    assert original_coordinator.update_interval == timedelta(seconds=60)
+
+    with patch.object(
+        hass.config_entries, "async_reload", wraps=hass.config_entries.async_reload
+    ) as reload_entry:
+        hass.config_entries.async_update_entry(entry, options={"scan_interval": 1})
+        await hass.async_block_till_done()
+    reload_entry.assert_awaited_once_with(entry.entry_id)
+
+    assert entry.state == ConfigEntryState.LOADED
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    assert coordinator is not original_coordinator
+    assert coordinator.update_interval == timedelta(seconds=1)
+
+
+async def test_entry_metadata_updates_do_not_reload(hass, setup_integration):
+    """Metadata/data changes retain their existing explicit reconfigure reload."""
+    entry = setup_integration
+    with patch.object(hass.config_entries, "async_reload", return_value=True) as reload:
+        hass.config_entries.async_update_entry(
+            entry, title="Renamed Gateway", data={**entry.data, "host": "192.168.1.200"}
+        )
+        await hass.async_block_till_done()
+    reload.assert_not_awaited()
+
+
+async def test_loaded_entry_reconfigure_reloads_once(
+    hass, setup_integration, mock_ecowitt_api
+):
+    """Reconfiguring a loaded entry still performs exactly its explicit reload."""
+    entry = setup_integration
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "reconfigure", "entry_id": entry.entry_id}
+    )
+
+    with (
+        patch(
+            "custom_components.ecowitt_local.config_flow.EcowittLocalAPI",
+            return_value=mock_ecowitt_api,
+        ),
+        patch.object(
+            hass.config_entries, "async_reload", wraps=hass.config_entries.async_reload
+        ) as reload_entry,
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {"host": "192.168.1.200", "password": "test_password"}
+        )
+        await hass.async_block_till_done()
+
+    reload_entry.assert_awaited_once_with(entry.entry_id)
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.state == ConfigEntryState.LOADED
+    assert entry.data["host"] == "192.168.1.200"
 
 
 async def test_setup_entry_connection_error(

@@ -168,6 +168,7 @@ SENSOR_TYPES: Final[Dict[str, Dict[str, Any]]] = {
         "name": "Wind Direction",
         "entity_name": "Wind Direction",
         "unit": "°",
+        "device_class": "wind_direction",
         "icon": "mdi:compass",
         "state_class": "measurement_angle",
     },
@@ -175,6 +176,7 @@ SENSOR_TYPES: Final[Dict[str, Dict[str, Any]]] = {
         "name": "Wind Direction 10min Avg",
         "entity_name": "Wind Direction 10min Avg",
         "unit": "°",
+        "device_class": "wind_direction",
         "icon": "mdi:compass",
         "state_class": "measurement_angle",
     },
@@ -257,7 +259,7 @@ SENSOR_TYPES: Final[Dict[str, Dict[str, Any]]] = {
         "name": "UV Index",
         "entity_name": "UV Index",
         "unit": "UV Index",
-        "icon": "mdi:weather-sunny-alert",
+        "icon": "mdi:sun-wireless",
     },
     # Lightning sensor
     "lightning_num": {
@@ -499,6 +501,7 @@ SENSOR_TYPES: Final[Dict[str, Dict[str, Any]]] = {
         "name": "Wind Direction",
         "entity_name": "Wind Direction",
         "unit": "°",
+        "device_class": "wind_direction",
         "icon": "mdi:compass",
         "state_class": "measurement_angle",
     },
@@ -506,6 +509,7 @@ SENSOR_TYPES: Final[Dict[str, Dict[str, Any]]] = {
         "name": "Wind Direction Avg",
         "entity_name": "Wind Direction Avg",
         "unit": "°",
+        "device_class": "wind_direction",
         "icon": "mdi:compass",
         "state_class": "measurement_angle",
     },
@@ -528,7 +532,7 @@ SENSOR_TYPES: Final[Dict[str, Dict[str, Any]]] = {
         "name": "UV Index",
         "entity_name": "UV Index",
         "unit": "UV Index",
-        "icon": "mdi:weather-sunny-alert",
+        "icon": "mdi:sun-wireless",
     },
     # Resets to 0 when the rain event ends: a restarting counter, so each drop is a
     # new meter cycle rather than a negative change (plain "total" subtracts it).
