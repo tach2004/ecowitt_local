@@ -127,6 +127,12 @@
           }
         }
       },
+      "absolute_humidity": {
+        "name": "Absolut luftfugtighed"
+      },
+      "absolute_humidity_ch": {
+        "name": "Absolut luftfugtighed kanal {channel}"
+      },
       "absolute_pressure": {
         "name": "Absolut lufttryk",
         "state_attributes": {
@@ -448,6 +454,9 @@
             "name": "Råværdi"
           }
         }
+      },
+      "co2_sensor_absolute_humidity": {
+        "name": "Absolut luftfugtighed for CO₂-sensor"
       },
       "co2_sensor_humidity": {
         "name": "CO2-sensorens luftfugtighed",
@@ -1276,6 +1285,9 @@
             "name": "Råværdi"
           }
         }
+      },
+      "indoor_absolute_humidity": {
+        "name": "Absolut luftfugtighed indendørs"
       },
       "indoor_humidity": {
         "name": "Indendørs luftfugtighed",
@@ -2472,6 +2484,9 @@
             "name": "Råværdi"
           }
         }
+      },
+      "outdoor_absolute_humidity": {
+        "name": "Absolut luftfugtighed udendørs"
       },
       "outdoor_humidity": {
         "name": "Udendørs luftfugtighed",

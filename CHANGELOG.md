@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.2] - 2026-11-18
+
+### Added
+- **Absolute humidity** in g/m³ for Ecowitt sensors that report both air temperature and relative humidity. Ecowitt Local calculates the value at each poll with readings from the same sensor and marks an existing entity unavailable when an input is missing or invalid. Rain-only, temperature-only and soil sensors do not get this entity. The entity uses the `mdi:water-opacity` icon.
+
 ## [1.12.1] - 2026-11-13
 
 ### Fixed

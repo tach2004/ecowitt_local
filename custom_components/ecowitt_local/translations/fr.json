@@ -127,6 +127,12 @@
           }
         }
       },
+      "absolute_humidity": {
+        "name": "Humidité absolue"
+      },
+      "absolute_humidity_ch": {
+        "name": "Humidité absolue du canal {channel}"
+      },
       "absolute_pressure": {
         "name": "Pression absolue",
         "state_attributes": {
@@ -448,6 +454,9 @@
             "name": "Valeur brute"
           }
         }
+      },
+      "co2_sensor_absolute_humidity": {
+        "name": "Humidité absolue du capteur de CO₂"
       },
       "co2_sensor_humidity": {
         "name": "Humidité du capteur CO2",
@@ -1276,6 +1285,9 @@
             "name": "Valeur brute"
           }
         }
+      },
+      "indoor_absolute_humidity": {
+        "name": "Humidité absolue intérieure"
       },
       "indoor_humidity": {
         "name": "Humidité intérieure",
@@ -2472,6 +2484,9 @@
             "name": "Valeur brute"
           }
         }
+      },
+      "outdoor_absolute_humidity": {
+        "name": "Humidité absolue extérieure"
       },
       "outdoor_humidity": {
         "name": "Humidité extérieure",

@@ -6,6 +6,7 @@ import asyncio
 import logging
 import re
 from datetime import datetime, timedelta
+from math import exp
 from typing import Any, Dict, List, Optional, Set
 
 from homeassistant.config_entries import ConfigEntry
@@ -21,6 +22,7 @@ from .api import (
 from .api import ConnectionError as APIConnectionError
 from .api import EcowittLocalAPI
 from .const import (
+    ABSOLUTE_HUMIDITY_PAIRS,
     BATTERY_SENSORS,
     BINARY_SENSORS,
     CONF_INCLUDE_INACTIVE,
@@ -286,9 +288,9 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                     # no data yet and says nothing about the sensor type.
                     humidity = item.get("humidity")
                     temp = item.get("temp")
-                    if humidity and humidity != "None":
+                    if humidity is not None and humidity not in ("", "None"):
                         aisle_with_humidity.add(unique_id)
-                    elif temp and temp != "None":
+                    elif temp is not None and temp not in ("", "None"):
                         aisle_without_humidity.add(unique_id)
                 title = str(item.get("name") or "").strip()
                 if title:
@@ -588,7 +590,7 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
                 # Indoor humidity
                 if "inhumi" in wh25_item:
-                    humi_val = wh25_item["inhumi"].replace("%", "")
+                    humi_val = str(wh25_item["inhumi"]).replace("%", "")
                     all_sensor_items.append({"id": "humidityin", "val": humi_val})
                     _LOGGER.debug("Added indoor humidity: humidityin = %s", humi_val)
 
@@ -720,7 +722,7 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
                     if channel:
                         # Create temperature sensor if temp data exists
-                        if temp and temp != "None":
+                        if temp is not None and temp not in ("", "None"):
                             temp_key = f"temp{channel}f"
                             # Pass the actual gateway unit so the coordinator overrides the
                             # SENSOR_TYPES "°F" default. Ecowitt firmware always reports
@@ -740,8 +742,8 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                             )
 
                         # Create humidity sensor if humidity data exists
-                        if humidity and humidity != "None":
-                            humidity_val = humidity.replace("%", "")
+                        if humidity is not None and humidity not in ("", "None"):
+                            humidity_val = str(humidity).replace("%", "")
                             humidity_key = f"humidity{channel}"
                             all_sensor_items.append(
                                 {"id": humidity_key, "val": humidity_val}
@@ -1032,7 +1034,7 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             if isinstance(co2_item, dict):
                 temp_val = co2_item.get("temp")
                 temp_unit = co2_item.get("unit", "C")
-                if temp_val:
+                if temp_val is not None and temp_val != "":
                     temp_key = "tf_co2c" if temp_unit == "C" else "tf_co2"
                     all_sensor_items.append(
                         {"id": temp_key, "val": temp_val, "unit": temp_unit}
@@ -1042,7 +1044,7 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                     )
 
                 humidity_str = co2_item.get("humidity", "")
-                if humidity_str:
+                if humidity_str is not None and humidity_str != "":
                     humidity_val = str(humidity_str).replace("%", "").strip()
                     all_sensor_items.append({"id": "humi_co2", "val": humidity_val})
                     _LOGGER.debug("Added WH45 humidity: humi_co2 = %s", humidity_val)
@@ -1196,12 +1198,12 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
         for item in all_sensor_items:
             sensor_key = item.get("id") or ""
-            sensor_value = item.get("val") or ""
+            sensor_value = item.get("val", "")
             item_unit = item.get(
                 "unit"
             )  # Check for separate unit field (e.g., {"id": "0x02", "val": "43.7", "unit": "F"})
 
-            if not sensor_key:
+            if not sensor_key or sensor_key.startswith("absolute_humidity_"):
                 continue
 
             # Skip purely numeric decimal-string keys with no SENSOR_TYPES entry.
@@ -1216,7 +1218,9 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                 continue
 
             # Skip empty values unless we include inactive sensors
-            if not sensor_value and not self._include_inactive:
+            if (
+                sensor_value is None or sensor_value == ""
+            ) and not self._include_inactive:
                 _LOGGER.debug(
                     "Skipping sensor %s with empty value (include_inactive=%s)",
                     sensor_key,
@@ -1487,6 +1491,8 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                     except (ValueError, TypeError):
                         pass
 
+        self._add_absolute_humidity_sensors(sensors_data)
+
         # Add diagnostic and signal strength sensors for hardware devices
         self._add_diagnostic_and_signal_sensors(sensors_data)
 
@@ -1504,6 +1510,69 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             )
 
         return processed_data
+
+    def _add_absolute_humidity_sensors(self, sensors_data: Dict[str, Any]) -> None:
+        """Derive absolute humidity from paired air readings in this poll."""
+        readings = {info["sensor_key"]: info for info in sensors_data.values()}
+        for sensor_key, temperature_key, humidity_key in ABSOLUTE_HUMIDITY_PAIRS:
+            temperature_info = readings.get(temperature_key)
+            humidity_info = readings.get(humidity_key)
+            if temperature_info is None or humidity_info is None:
+                continue
+            hardware_id = temperature_info["hardware_id"]
+            if hardware_id != humidity_info["hardware_id"]:
+                continue
+
+            temperature = temperature_info["state"]
+            humidity = humidity_info["state"]
+            if (
+                type(temperature) not in (int, float)
+                or type(humidity) not in (int, float)
+                or humidity_info["unit_of_measurement"] != "%"
+                or not 0 <= humidity <= 100
+            ):
+                continue
+
+            unit = temperature_info["unit_of_measurement"]
+            # These bounds cover Ecowitt air sensors and reject invalid readings,
+            # including non-finite values, before evaluating the Magnus equation.
+            if unit == "°F" and -112 <= temperature <= 212:
+                temperature = (temperature - 32) * 5 / 9
+            elif unit != "°C" or not -80 <= temperature <= 100:
+                continue
+
+            entity_id, name = self.sensor_mapper.generate_entity_id(
+                sensor_key, hardware_id, sensor_key.removeprefix("absolute_humidity_")
+            )
+            if entity_id in sensors_data:
+                continue
+
+            # Magnus saturation vapor pressure over water in hPa, then water
+            # vapor density in g/m³ from the ideal gas law.
+            saturation_pressure = 6.112 * exp(
+                17.62 * temperature / (243.12 + temperature)
+            )
+            vapor_pressure = saturation_pressure * humidity / 100
+            value = 216.679 * vapor_pressure / (273.15 + temperature)
+            definition = SENSOR_TYPES[sensor_key]
+            sensors_data[entity_id] = {
+                "entity_id": entity_id,
+                "name": name,
+                "state": value,
+                "unit_of_measurement": definition["unit"],
+                "device_class": definition["device_class"],
+                "state_class": definition["state_class"],
+                "suggested_display_precision": definition[
+                    "suggested_display_precision"
+                ],
+                "category": "sensor",
+                "sensor_key": sensor_key,
+                "hardware_id": hardware_id,
+                "attributes": {
+                    **temperature_info["attributes"],
+                    "sensor_key": sensor_key,
+                },
+            }
 
     def _add_diagnostic_and_signal_sensors(self, sensors_data: Dict[str, Any]) -> None:
         """Add signal strength and diagnostic sensors for hardware devices."""
@@ -1807,7 +1876,7 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
     def _convert_sensor_value(self, value: Any, unit: Optional[str]) -> Any:
         """Convert sensor value to appropriate type."""
-        if not value or value == "":
+        if value is None or value == "":
             return None
 
         try:
@@ -1826,6 +1895,17 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             ):
                 return None
 
+            # Parse plain numbers first so an exponent is not mistaken for a unit.
+            try:
+                return int(str_value)
+            except ValueError:
+                pass
+
+            try:
+                return float(str_value)
+            except ValueError:
+                pass
+
             # Handle values with embedded units (e.g., "29.40 inHg", "46.4 F", "89%")
             import re
 
@@ -1841,19 +1921,6 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                         return float(numeric_part)
                 except ValueError:  # pragma: no cover
                     pass
-
-            # Fallback to original logic for pure numeric strings
-            # Try integer first
-            try:
-                return int(str_value)
-            except ValueError:
-                pass
-
-            # Try float
-            try:
-                return float(str_value)
-            except ValueError:
-                pass
 
             # Return as string if conversion fails
             return str_value
@@ -2028,8 +2095,12 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
         for eid, sdata in sensors_dict.items():
             if isinstance(sdata, dict):
                 if sdata.get("sensor_key") == sensor_key:
-                    # If hardware_id specified, must match; otherwise any match works
-                    if hardware_id is None or sdata.get("hardware_id") == hardware_id:
+                    # A derived sensor on the gateway must not start reporting
+                    # readings assigned to a hardware device after mapping updates.
+                    if sdata.get("hardware_id") == hardware_id or (
+                        hardware_id is None
+                        and not sensor_key.startswith("absolute_humidity_")
+                    ):
                         return dict(sdata)
         return None
 

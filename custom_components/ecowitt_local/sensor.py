@@ -485,6 +485,7 @@ class EcowittLocalSensor(
 
         # Use device class icons or custom ones
         sensor_icons = {
+            "absolute_humidity": "mdi:water-opacity",
             "soil": "mdi:sprout",
             "leak": "mdi:water-alert",
             "lightning": "mdi:flash",
