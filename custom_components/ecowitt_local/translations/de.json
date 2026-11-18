@@ -127,6 +127,12 @@
           }
         }
       },
+      "absolute_humidity": {
+        "name": "Absolute Luftfeuchtigkeit"
+      },
+      "absolute_humidity_ch": {
+        "name": "Absolute Luftfeuchtigkeit Kanal {channel}"
+      },
       "absolute_pressure": {
         "name": "Absoluter Luftdruck",
         "state_attributes": {
@@ -448,6 +454,9 @@
             "name": "Rohwert"
           }
         }
+      },
+      "co2_sensor_absolute_humidity": {
+        "name": "Absolute Luftfeuchtigkeit des CO₂-Sensors"
       },
       "co2_sensor_humidity": {
         "name": "Luftfeuchtigkeit des CO2-Sensors",
@@ -1276,6 +1285,9 @@
             "name": "Rohwert"
           }
         }
+      },
+      "indoor_absolute_humidity": {
+        "name": "Absolute Luftfeuchtigkeit innen"
       },
       "indoor_humidity": {
         "name": "Luftfeuchtigkeit innen",
@@ -2472,6 +2484,9 @@
             "name": "Rohwert"
           }
         }
+      },
+      "outdoor_absolute_humidity": {
+        "name": "Absolute Luftfeuchtigkeit außen"
       },
       "outdoor_humidity": {
         "name": "Luftfeuchtigkeit außen",

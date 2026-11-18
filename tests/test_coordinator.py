@@ -112,6 +112,53 @@ async def test_coordinator_auth_error_handling(coordinator):
         await coordinator._async_update_data()
 
 
+@pytest.mark.parametrize(
+    ("temperature", "unit", "humidity", "humidity_unit", "expected"),
+    [
+        ("-10", "C", "50%", None, 1.18),
+        ("14", "F", "50%", None, 1.18),
+        (None, "C", "50%", None, None),
+        ("--", "C", "50%", None, None),
+        ("-243.12", "C", "50%", None, None),
+        ("1e500", "F", "50%", None, None),
+        ("20", "K", "50%", None, None),
+        ("20", "C", "NaN", None, None),
+        ("20", "C", "101%", None, None),
+        ("20", "C", "50", "g/m³", None),
+    ],
+)
+async def test_absolute_humidity_validates_air_readings(
+    coordinator, temperature, unit, humidity, humidity_unit, expected
+):
+    """Unit conversions work below freezing, and malformed inputs are ignored."""
+    data = await coordinator._process_live_data(
+        {
+            "common_list": [
+                {"id": "0x01", "val": temperature, "unit": unit},
+                {"id": "0x06", "val": humidity, "unit": humidity_unit},
+            ]
+        }
+    )
+    sensor = data["sensors"].get("sensor.ecowitt_absolute_humidity_indoor")
+    if expected is None:
+        assert sensor is None
+    else:
+        assert sensor["state"] == pytest.approx(expected, abs=0.005)
+
+
+async def test_absolute_humidity_does_not_combine_different_devices(coordinator):
+    """When temperature and humidity are mapped to different devices, skip them."""
+    data = await coordinator._process_live_data(
+        {
+            "common_list": [
+                {"id": "0x02", "val": "20", "_force_hardware_id": "A01"},
+                {"id": "0x07", "val": "50%", "_force_hardware_id": "A02"},
+            ]
+        }
+    )
+    assert not any("absolute_humidity" in key for key in data["sensors"])
+
+
 @pytest.mark.asyncio
 async def test_coordinator_connection_error_handling(coordinator):
     """Test coordinator handling connection errors."""

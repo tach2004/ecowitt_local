@@ -948,6 +948,7 @@ class SensorMapper:
         # Map common patterns (more specific patterns must come before generic ones)
         type_mappings = {
             "temp": "temperature",
+            "absolute_humidity": "absolute_humidity",
             "humid": "humidity",
             "barom": "pressure",
             "wind": "wind",

@@ -127,6 +127,12 @@
           }
         }
       },
+      "absolute_humidity": {
+        "name": "Absolute Humidity"
+      },
+      "absolute_humidity_ch": {
+        "name": "Absolute Humidity CH{channel}"
+      },
       "absolute_pressure": {
         "name": "Absolute Pressure",
         "state_attributes": {
@@ -448,6 +454,9 @@
             "name": "Raw Value"
           }
         }
+      },
+      "co2_sensor_absolute_humidity": {
+        "name": "CO2 Sensor Absolute Humidity"
       },
       "co2_sensor_humidity": {
         "name": "CO2 Sensor Humidity",
@@ -1276,6 +1285,9 @@
             "name": "Raw Value"
           }
         }
+      },
+      "indoor_absolute_humidity": {
+        "name": "Indoor Absolute Humidity"
       },
       "indoor_humidity": {
         "name": "Indoor Humidity",
@@ -2472,6 +2484,9 @@
             "name": "Raw Value"
           }
         }
+      },
+      "outdoor_absolute_humidity": {
+        "name": "Outdoor Absolute Humidity"
       },
       "outdoor_humidity": {
         "name": "Outdoor Humidity",

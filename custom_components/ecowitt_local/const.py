@@ -44,6 +44,20 @@ GATEWAY_SENSORS: Final = {
     "baromrelin",  # Relative pressure
 }
 
+# Each pair contains air temperature and relative humidity from the same source.
+ABSOLUTE_HUMIDITY_PAIRS: Final = (
+    ("absolute_humidity_indoor", "0x01", "0x06"),
+    ("absolute_humidity_indoor", "tempinf", "humidityin"),
+    ("absolute_humidity_outdoor", "0x02", "0x07"),
+    ("absolute_humidity_outdoor", "tempf", "humidity"),
+    ("absolute_humidity_co2", "tf_co2c", "humi_co2"),
+    ("absolute_humidity_co2", "tf_co2", "humi_co2"),
+    *(
+        (f"absolute_humidity_ch{channel}", f"temp{channel}f", f"humidity{channel}")
+        for channel in range(1, 9)
+    ),
+)
+
 
 def _generate_channel_sensors(
     base_key: str,
@@ -637,6 +651,38 @@ SENSOR_TYPES.update(
 SENSOR_TYPES.update(
     _generate_channel_sensors(
         "humidity", "Humidity CH{ch}", {"unit": "%", "device_class": "humidity"}, 8
+    )
+)
+
+_ABSOLUTE_HUMIDITY_DEFINITION = {
+    "entity_name": "Absolute Humidity",
+    "unit": "g/m³",
+    "device_class": "absolute_humidity",
+    "state_class": "measurement",
+    "suggested_display_precision": 2,
+}
+SENSOR_TYPES.update(
+    {
+        "absolute_humidity_indoor": {
+            **_ABSOLUTE_HUMIDITY_DEFINITION,
+            "name": "Indoor Absolute Humidity",
+        },
+        "absolute_humidity_outdoor": {
+            **_ABSOLUTE_HUMIDITY_DEFINITION,
+            "name": "Outdoor Absolute Humidity",
+        },
+        "absolute_humidity_co2": {
+            **_ABSOLUTE_HUMIDITY_DEFINITION,
+            "name": "CO2 Sensor Absolute Humidity",
+        },
+    }
+)
+SENSOR_TYPES.update(
+    _generate_channel_sensors(
+        "absolute_humidity_ch",
+        "Absolute Humidity CH{ch}",
+        _ABSOLUTE_HUMIDITY_DEFINITION,
+        8,
     )
 )
 SENSOR_TYPES.update(
