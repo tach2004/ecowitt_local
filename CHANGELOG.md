@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1] - 2026-11-19
+
+### Fixed
+- **Keep WN32 outdoor readings on an offline WS90.** With the option enabled, the same WS90 entities continue to receive the WN32's outdoor temperature, relative humidity, dew point and calculated absolute humidity as long as the gateway still identifies a single WS90. The Online diagnostic follows the WS90's own signal. If the gateway reports no WS90 or several possible targets, the standard assignment applies.
+
 ## [1.13.0] - 2026-11-19
 
 ### Added

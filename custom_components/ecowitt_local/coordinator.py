@@ -7,7 +7,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from math import exp
-from typing import Any, Collection, Dict, List, Optional, Set
+from typing import Any, Dict, List, Mapping, Optional, Set
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PASSWORD
@@ -1530,7 +1530,7 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
         self._add_absolute_humidity_sensors(sensors_data)
 
         # Add diagnostic and signal strength sensors for hardware devices
-        self._add_diagnostic_and_signal_sensors(sensors_data, wn32_assignments.keys())
+        self._add_diagnostic_and_signal_sensors(sensors_data, wn32_assignments)
 
         # Process gateway information
         processed_data["gateway_info"] = await self._process_gateway_info()
@@ -1611,13 +1611,17 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             }
 
     def _add_diagnostic_and_signal_sensors(
-        self, sensors_data: Dict[str, Any], wn32_hardware_ids: Collection[str] = ()
+        self,
+        sensors_data: Dict[str, Any],
+        wn32_assignments: Mapping[str, str] | None = None,
     ) -> None:
         """Add signal strength and diagnostic sensors for hardware devices."""
+        assignments = wn32_assignments or {}
+        assignment_devices = dict.fromkeys([*assignments, *assignments.values()])
         hardware_ids = dict.fromkeys(
             info.get("hardware_id") for info in sensors_data.values()
         )
-        hardware_ids.update(dict.fromkeys(wn32_hardware_ids))
+        hardware_ids.update(assignment_devices)
         for hardware_id in hardware_ids:
             if not hardware_id:
                 continue
@@ -1629,13 +1633,13 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
             channel = hardware_info.get("channel")
             signal = hardware_info.get("signal")
-            wn32_signal = (
+            mapping_signal = (
                 hardware_info["signal_bars"]
-                if hardware_id in wn32_hardware_ids
+                if hardware_id in assignment_devices
                 else None
             )
-            if wn32_signal is not None:
-                signal = str(wn32_signal) if wn32_signal >= 0 else ""
+            if mapping_signal is not None:
+                signal = str(mapping_signal) if mapping_signal >= 0 else ""
 
             # Add Signal Strength sensor (regular sensor, same level as battery)
             if signal and signal not in ("--", ""):
@@ -1758,9 +1762,9 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                     "entity_category": "diagnostic",
                 },
             }
-            if wn32_signal is not None:
+            if mapping_signal is not None:
                 sensors_data[hardware_id_entity_id]["mapping_online"] = (
-                    wn32_signal > 0 if wn32_signal >= 0 else None
+                    mapping_signal > 0 if mapping_signal >= 0 else None
                 )
 
             # Add battery entity from sensors_info for devices that don't emit a battery
@@ -1789,11 +1793,11 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
             sensor_type = hardware_info.get("sensor_type", "")
             fallback_batt_key = (
                 "wh26batt"
-                if hardware_id in wn32_hardware_ids
+                if hardware_id in assignments
                 else _SENSORS_INFO_BATTERY_KEYS.get(sensor_type.upper())
             )
             battery_raw = str(hardware_info.get("battery", "")).strip()
-            if hardware_id in wn32_hardware_ids and battery_raw not in (
+            if hardware_id in assignments and battery_raw not in (
                 "0",
                 "1",
                 "2",

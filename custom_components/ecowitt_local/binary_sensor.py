@@ -214,7 +214,7 @@ class EcowittSensorOnlineBinarySensor(
             f"sensor.ecowitt_hardware_id_{self._hardware_id.lower()}", {}
         )
         if "mapping_online" in hardware_id_sensor:
-            # Fresh diagnostic records can also describe a disconnected WN32.
+            # Readings assigned to a device can be fresh even if it is offline.
             online: bool | None = hardware_id_sensor["mapping_online"]
             return online
 
