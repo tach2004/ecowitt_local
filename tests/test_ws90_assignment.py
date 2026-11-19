@@ -315,6 +315,28 @@ async def test_invalid_outdoor_readings_do_not_publish_old_values(hass, gateway)
     assert _outdoor_entities(hass, entry, "A90") == ws90_ids
 
 
+async def test_assignment_uses_mapping_at_entity_creation(hass, gateway):
+    """Use the latest target if a mapping refresh finishes during live processing."""
+    entry = _entry(hass, **{CONF_ASSIGN_WN32_TO_WS90: True})
+    await _setup(hass, entry, gateway, [_WS90, _WN32], _live())
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+
+    async def refresh_mapping_during_poll():
+        gateway.get_all_sensor_mappings.return_value = [_WN32]
+        await coordinator._update_sensor_mapping()
+        return []
+
+    gateway.get_soil_calibration.side_effect = refresh_mapping_during_poll
+    gateway.get_live_data.return_value = _live("24")
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+
+    wn32_ids = _expected_ids("BA90")
+    assert _outdoor_entities(hass, entry, "BA90") == wn32_ids
+    assert float(_state(hass, wn32_ids["0x02"])) == 24
+    _assert_inactive(hass, _expected_ids("A90"))
+
+
 async def test_assignment_is_scoped_to_each_gateway(hass, mock_ecowitt_api):
     """A WS90 on one gateway cannot become the target for a different gateway."""
     first_gateway = mock_ecowitt_api

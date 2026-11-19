@@ -354,12 +354,6 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
 
         self._apply_live_titles(raw_data)
 
-        wn32_assignments = (
-            self.sensor_mapper.get_wn32_ws90_assignments()
-            if self.assign_wn32_to_ws90
-            else {}
-        )
-
         # Process all sensor data sources
         all_sensor_items = []
 
@@ -1208,6 +1202,14 @@ class EcowittLocalDataUpdateCoordinator(DataUpdateCoordinator[Dict[str, Any]]):
                             )
         except Exception as err:
             _LOGGER.debug("Could not fetch LDS config data: %s", err)
+
+        # A manual mapping refresh can run during the API calls above. Resolve
+        # the assignment and the hardware IDs from the same current mapping.
+        wn32_assignments = (
+            self.sensor_mapper.get_wn32_ws90_assignments()
+            if self.assign_wn32_to_ws90
+            else {}
+        )
 
         _LOGGER.debug("Total sensor items to process: %d", len(all_sensor_items))
 
