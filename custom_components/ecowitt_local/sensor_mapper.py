@@ -785,9 +785,8 @@ class SensorMapper:
             if info["sensor_type"].lower() in _WS90_SENSOR_TYPES
             and info["hardware_id"] != "00000000"
         ]
-        # Wait for an unambiguous, receiving station. A second station can be
-        # temporarily out of range, so its signal cannot break a tie.
-        if len(stations) != 1 or self._sensor_info[stations[0]]["signal_bars"] <= 0:
+        # A uniquely identified station can host readings even when it is offline.
+        if len(stations) != 1:
             return {}
 
         return {

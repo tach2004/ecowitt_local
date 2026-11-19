@@ -121,11 +121,12 @@ def _assert_inactive(hass, entity_ids):
         ([_WS90, _WN32, _mapping("A80", "ws80", 2, "Wind")], True, "A90"),
         ([_WS90, _WN32, {**_WS90, "id": "DD90", "img": "ws90"}], True, "BA90"),
         ([_WS90, {**_WS90, "id": "DD90", "signal": "0"}, _WN32], True, "BA90"),
-        ([{**_WS90, "signal": "0"}, _WN32], True, "BA90"),
+        ([{**_WS90, "signal": "0"}, _WN32], True, "A90"),
+        ([{**_WS90, "signal": "0"}, _WN32], False, "BA90"),
         ([{**_WS90, "id": "00000000"}, _WN32], True, "BA90"),
     ],
 )
-async def test_assignment_requires_a_unique_receiving_ws90(
+async def test_assignment_requires_a_unique_ws90(
     hass, gateway, mappings, enabled, expected
 ):
     """Register one set of outdoor measurements where the active mode expects it."""
@@ -297,6 +298,39 @@ async def test_pairing_ws90_does_not_reuse_its_readings_for_an_old_wn32_entity(
     await _refresh(hass, entry, gateway, [_WN32], _live("22"))
     assert float(_state(hass, wn32_ids["0x02"])) == 22
     _assert_inactive(hass, ws90_ids)
+
+
+async def test_ws90_keeps_outdoor_readings_when_its_radio_goes_offline(hass, gateway):
+    """The WS90's Online state and the assigned WN32 measurements are independent."""
+    entry = _entry(hass, **{CONF_ASSIGN_WN32_TO_WS90: True})
+    await _setup(hass, entry, gateway, [_WS90, _WN32], _live())
+    ws90_ids = _outdoor_entities(hass, entry, "A90")
+    assert ws90_ids == _expected_ids("A90")
+    entries = _entities_by_key(hass, entry)
+    ws90_online = entries[f"{DOMAIN}_A90_online"].entity_id
+    wn32_online = entries[f"{DOMAIN}_BA90_online"].entity_id
+    assert _state(hass, ws90_online) == STATE_ON
+
+    live = {
+        "common_list": [
+            {"id": "0x02", "val": "24", "unit": "C"},
+            {"id": "0x07", "val": "55%"},
+            {"id": "0x03", "val": "12", "unit": "C"},
+        ]
+    }
+    await _refresh(hass, entry, gateway, [{**_WS90, "signal": "0"}, _WN32], live)
+
+    for key, value in zip(_OUTDOOR_KEYS, (24, 55, 12, 11.94), strict=True):
+        assert float(_state(hass, ws90_ids[key])) == pytest.approx(value, abs=0.02)
+    assert _outdoor_entities(hass, entry, "A90") == ws90_ids
+    assert _outdoor_entities(hass, entry, "BA90") == {}
+    assert _state(hass, ws90_online) == STATE_OFF
+    assert _state(hass, wn32_online) == STATE_ON
+
+    await _refresh(hass, entry, gateway, [_WS90, _WN32], _live("25"))
+    assert _state(hass, ws90_online) == STATE_ON
+    assert _outdoor_entities(hass, entry, "A90") == ws90_ids
+    assert float(_state(hass, ws90_ids["0x02"])) == 25
 
 
 async def test_invalid_outdoor_readings_do_not_publish_old_values(hass, gateway):
