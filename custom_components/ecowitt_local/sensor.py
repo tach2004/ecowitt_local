@@ -40,6 +40,7 @@ from .const import (
     DOMAIN,
     MANUFACTURER,
     SENSOR_TYPES,
+    SHARED_OUTDOOR_KEYS,
 )
 from .coordinator import EcowittLocalDataUpdateCoordinator
 from .device_compat import via_device_kwargs
@@ -51,6 +52,7 @@ from .localization import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+_WS90_OUTDOOR_ENTITY_KEYS = SHARED_OUTDOOR_KEYS | {"absolute_humidity_outdoor"}
 
 # Unit conversion mappings
 UNIT_CONVERSIONS = {
@@ -270,17 +272,30 @@ class EcowittLocalSensor(
             self._attr_native_unit_of_measurement = PERCENTAGE
             self._attr_state_class = SensorStateClass.MEASUREMENT
 
+    def _get_sensor_info(self) -> Optional[Dict[str, Any]]:
+        """Find this reading independently of the name in the entity registry."""
+        sensor_info: Optional[Dict[str, Any]] = self.coordinator.get_sensor_data_by_key(
+            self._sensor_key, self._hardware_id
+        )
+        if (
+            self._sensor_key in _WS90_OUTDOOR_ENTITY_KEYS
+            and self.coordinator.assign_wn32_to_ws90
+        ):
+            # A different device can now publish the same key after a remapping.
+            if (
+                sensor_info is None
+                or sensor_info.get("hardware_id") != self._hardware_id
+            ):
+                return None
+            return sensor_info
+        if sensor_info is None:
+            sensor_info = self.coordinator.get_sensor_data(self.entity_id)
+        return sensor_info
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        # Primary: look up by sensor_key + hardware_id. This is stable regardless of
-        # whether the entity's registry entity_id matches the coordinator's generated
-        # entity_id (they can diverge when entity_id format changes between versions).
-        sensor_info = self.coordinator.get_sensor_data_by_key(
-            self._sensor_key, self._hardware_id
-        )
-        if sensor_info is None:
-            sensor_info = self.coordinator.get_sensor_data(self.entity_id)
+        sensor_info = self._get_sensor_info()
         if sensor_info:
             self._update_attributes(sensor_info)
         self.async_write_ha_state()
@@ -350,11 +365,7 @@ class EcowittLocalSensor(
     @property
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Return additional state attributes."""
-        sensor_info = self.coordinator.get_sensor_data_by_key(
-            self._sensor_key, self._hardware_id
-        )
-        if sensor_info is None:
-            sensor_info = self.coordinator.get_sensor_data(self.entity_id)
+        sensor_info = self._get_sensor_info()
         if not sensor_info:
             return {}
 
@@ -410,12 +421,7 @@ class EcowittLocalSensor(
         if not self.coordinator.last_update_success:
             return False
 
-        # Primary: look up by sensor_key + hardware_id (stable across entity_id format changes)
-        sensor_info = self.coordinator.get_sensor_data_by_key(
-            self._sensor_key, self._hardware_id
-        )
-        if sensor_info is None:
-            sensor_info = self.coordinator.get_sensor_data(self.entity_id)
+        sensor_info = self._get_sensor_info()
         if not sensor_info:
             return False
 

@@ -6,7 +6,7 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from .const import BATTERY_SENSORS, SENSOR_TYPES
+from .const import BATTERY_SENSORS, SENSOR_TYPES, WN32_SENSOR_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,6 +31,7 @@ _SENSOR_PRIORITY: Dict[str, int] = {
     "wh69": 1,
     "wh65": 1,
 }
+_WS90_SENSOR_TYPES = {"ws90", "wh90", "weather_station_ws90", "weather_station_wh90"}
 
 
 class SensorMapper:
@@ -177,6 +178,7 @@ class SensorMapper:
                     "device_model": device_model,
                     "battery": battery,
                     "signal": signal,
+                    "signal_bars": signal_int,
                     "rssi": rssi,
                     "raw_data": sensor,
                 }
@@ -659,7 +661,7 @@ class SensorMapper:
                     "wh25batt",
                 ]
             )
-        elif sensor_type.lower() in ("wh26", "wn32", "outdoor_temp_hum"):
+        elif sensor_type.lower() in WN32_SENSOR_TYPES:
             # Outdoor temperature/humidity sensor (single-channel, e.g. WH26/WN32)
             keys.extend(
                 [
@@ -774,6 +776,26 @@ class SensorMapper:
             Hardware ID if found, None otherwise
         """
         return self._hardware_mapping.get(live_data_key)
+
+    def get_wn32_ws90_assignments(self) -> dict[str, str]:
+        """Return logical targets for WN32 readings on this gateway."""
+        stations = [
+            hardware_id
+            for hardware_id, info in self._sensor_info.items()
+            if info["sensor_type"].lower() in _WS90_SENSOR_TYPES
+            and info["hardware_id"] != "00000000"
+        ]
+        # Wait for an unambiguous, receiving station. A second station can be
+        # temporarily out of range, so its signal cannot break a tie.
+        if len(stations) != 1 or self._sensor_info[stations[0]]["signal_bars"] <= 0:
+            return {}
+
+        return {
+            hardware_id: stations[0]
+            for hardware_id, info in self._sensor_info.items()
+            if info["sensor_type"].lower() in WN32_SENSOR_TYPES
+            and info["hardware_id"] != "00000000"
+        }
 
     def set_live_titles(self, titles: Dict[str, str]) -> None:
         """Set the gateway "Customize Title" names, keyed by unique_id.
