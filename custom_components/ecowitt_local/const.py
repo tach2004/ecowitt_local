@@ -13,11 +13,13 @@ CONF_PASSWORD: Final = "password"
 CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_MAPPING_INTERVAL: Final = "mapping_interval"
 CONF_INCLUDE_INACTIVE: Final = "include_inactive"
+CONF_ASSIGN_WN32_TO_WS90: Final = "assign_wn32_to_ws90"
 
 # Default values
 DEFAULT_SCAN_INTERVAL: Final = 60  # seconds
 DEFAULT_MAPPING_INTERVAL: Final = 600  # seconds (10 minutes)
 DEFAULT_INCLUDE_INACTIVE: Final = False
+DEFAULT_ASSIGN_WN32_TO_WS90: Final = False
 
 # API endpoints
 API_LOGIN: Final = "/set_login_info"
@@ -43,6 +45,10 @@ GATEWAY_SENSORS: Final = {
     "baromabsin",  # Absolute pressure
     "baromrelin",  # Relative pressure
 }
+
+# Shared gateway readings for outdoor temperature, relative humidity and dew point.
+SHARED_OUTDOOR_KEYS: Final = frozenset({"0x02", "0x07", "0x03"})
+WN32_SENSOR_TYPES: Final = frozenset({"wh26", "wn32", "outdoor_temp_hum"})
 
 # Each pair contains air temperature and relative humidity from the same source.
 ABSOLUTE_HUMIDITY_PAIRS: Final = (

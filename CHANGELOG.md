@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-11-19
+
+### Added
+- **Optional WS90 assignment for WN32 outdoor readings.** The integration options can keep outdoor temperature, relative humidity, dew point and calculated absolute humidity on the existing WS90 entities. Ecowitt still selects the source at the gateway. The setting is off by default and reloads the integration when saved. When the gateway reports no receiving WS90 or several possible WS90 targets, the integration uses its standard assignment.
+- The WN32 keeps its own device and supported diagnostics when its outdoor readings are assigned to the WS90. Each device keeps its existing entity identity and history across mode changes, so Home Assistant can reuse its registry entries when it provides those entities again.
+
+### Changed
+- The default device name for WH26/WN32 identifies both models. Home Assistant names set by the user and gateway custom titles supported by the integration still take precedence.
+
 ## [1.12.2] - 2026-11-18
 
 ### Added

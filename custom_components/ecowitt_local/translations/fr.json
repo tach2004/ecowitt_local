@@ -55,16 +55,18 @@
     "step": {
       "init": {
         "title": "Options d'Ecowitt Local",
-        "description": "Configurez les intervalles d'interrogation et les options des capteurs.",
+        "description": "Configurez les intervalles d'interrogation et les options des capteurs.\n\nHome Assistant recharge automatiquement l’intégration après l’enregistrement. Aucun redémarrage manuel n’est nécessaire.",
         "data": {
           "scan_interval": "Intervalle d'interrogation des données en direct (secondes)",
           "mapping_interval": "Intervalle de mise à jour du mappage des capteurs (secondes)",
-          "include_inactive": "Inclure les capteurs inactifs"
+          "include_inactive": "Inclure les capteurs inactifs",
+          "assign_wn32_to_ws90": "Associer les mesures extérieures du WN32 à l’appareil WS90"
         },
         "data_description": {
           "scan_interval": "Fréquence d'interrogation des données en direct (1 à 300 secondes)",
           "mapping_interval": "Fréquence de rafraîchissement du mappage des capteurs (300 à 3600 secondes)",
-          "include_inactive": "Inclure les capteurs actuellement hors ligne ou sans données"
+          "include_inactive": "Inclure les capteurs actuellement hors ligne ou sans données",
+          "assign_wn32_to_ws90": "Si cette option est activée, la température extérieure, l’humidité, le point de rosée et l’humidité absolue restent associés aux entités WS90 existantes. Les mesures proviennent toujours des données du capteur extérieur que la passerelle privilégie."
         }
       }
     }
@@ -6398,6 +6400,9 @@
     },
     "temperature_humidity_sensor": {
       "name": "Capteur de température et d’humidité Ecowitt {hardware_id}"
+    },
+    "wh26_wn32_outdoor_temperature_humidity_sensor": {
+      "name": "Capteur extérieur de température et d’humidité Ecowitt WH26/WN32 {hardware_id}"
     },
     "wh69_weather_station": {
       "name": "Station météo Ecowitt WH69 {hardware_id}"

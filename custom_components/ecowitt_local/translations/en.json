@@ -55,16 +55,18 @@
     "step": {
       "init": {
         "title": "Ecowitt Local Options",
-        "description": "Configure polling intervals and sensor options.",
+        "description": "Configure polling intervals and sensor options.\n\nHome Assistant automatically reloads the integration after saving. A manual restart is not required.",
         "data": {
           "scan_interval": "Live Data Poll Interval (seconds)",
           "mapping_interval": "Sensor Mapping Update Interval (seconds)",
-          "include_inactive": "Include Inactive Sensors"
+          "include_inactive": "Include Inactive Sensors",
+          "assign_wn32_to_ws90": "Assign WN32 outdoor readings to the WS90 device"
         },
         "data_description": {
           "scan_interval": "How often to poll for live data (1-300 seconds)",
           "mapping_interval": "How often to refresh sensor mappings (300-3600 seconds)",
-          "include_inactive": "Include sensors that are currently offline or have no data"
+          "include_inactive": "Include sensors that are currently offline or have no data",
+          "assign_wn32_to_ws90": "When enabled, outdoor temperature, humidity, dew point and absolute humidity stay on the existing WS90 entities. The readings still come from the outdoor sensor data prioritized by the gateway."
         }
       }
     }
@@ -6398,6 +6400,9 @@
     },
     "temperature_humidity_sensor": {
       "name": "Ecowitt Temperature/Humidity Sensor {hardware_id}"
+    },
+    "wh26_wn32_outdoor_temperature_humidity_sensor": {
+      "name": "Ecowitt WH26/WN32 Outdoor Temperature/Humidity Sensor {hardware_id}"
     },
     "wh69_weather_station": {
       "name": "Ecowitt WH69 Weather Station {hardware_id}"

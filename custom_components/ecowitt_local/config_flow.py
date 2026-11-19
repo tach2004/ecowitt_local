@@ -20,9 +20,11 @@ from .api import (
 from .api import ConnectionError as APIConnectionError
 from .api import EcowittLocalAPI, EcowittLocalAPIError
 from .const import (
+    CONF_ASSIGN_WN32_TO_WS90,
     CONF_INCLUDE_INACTIVE,
     CONF_MAPPING_INTERVAL,
     CONF_SCAN_INTERVAL,
+    DEFAULT_ASSIGN_WN32_TO_WS90,
     DEFAULT_INCLUDE_INACTIVE,
     DEFAULT_MAPPING_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
@@ -336,6 +338,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 ): vol.All(int, vol.Range(min=300, max=3600)),
                 vol.Optional(
                     CONF_INCLUDE_INACTIVE, default=current_include_inactive
+                ): bool,
+                vol.Optional(
+                    CONF_ASSIGN_WN32_TO_WS90,
+                    default=self._get_option(
+                        CONF_ASSIGN_WN32_TO_WS90, DEFAULT_ASSIGN_WN32_TO_WS90
+                    ),
                 ): bool,
             }
         )

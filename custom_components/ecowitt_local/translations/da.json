@@ -55,16 +55,18 @@
     "step": {
       "init": {
         "title": "Indstillinger for Ecowitt Local",
-        "description": "Konfigurer forespørgselsintervaller og sensorindstillinger.",
+        "description": "Konfigurer forespørgselsintervaller og sensorindstillinger.\n\nHome Assistant genindlæser automatisk integrationen, når du gemmer. Manuel genstart er ikke nødvendig.",
         "data": {
           "scan_interval": "Forespørgselsinterval for aktuelle data (sekunder)",
           "mapping_interval": "Opdateringsinterval for sensorkortlægning (sekunder)",
-          "include_inactive": "Medtag inaktive sensorer"
+          "include_inactive": "Medtag inaktive sensorer",
+          "assign_wn32_to_ws90": "Tilknyt WN32's udendørsmålinger til WS90-enheden"
         },
         "data_description": {
           "scan_interval": "Hvor ofte der forespørges efter aktuelle data (1-300 sekunder)",
           "mapping_interval": "Hvor ofte sensorkortlægningen opdateres (300-3600 sekunder)",
-          "include_inactive": "Medtag sensorer, der i øjeblikket er offline eller ikke har data"
+          "include_inactive": "Medtag sensorer, der i øjeblikket er offline eller ikke har data",
+          "assign_wn32_to_ws90": "Ved aktivering forbliver udetemperatur, luftfugtighed, dugpunkt og absolut luftfugtighed på de eksisterende WS90-entiteter. Målingerne kommer fortsat fra de udendørssensordata, som gatewayen prioriterer."
         }
       }
     }
@@ -6398,6 +6400,9 @@
     },
     "temperature_humidity_sensor": {
       "name": "Ecowitt-temperatur- og luftfugtighedssensor {hardware_id}"
+    },
+    "wh26_wn32_outdoor_temperature_humidity_sensor": {
+      "name": "Ecowitt WH26/WN32 Udendørs temperatur-/luftfugtighedssensor {hardware_id}"
     },
     "wh69_weather_station": {
       "name": "Ecowitt-WH69-vejrstation {hardware_id}"

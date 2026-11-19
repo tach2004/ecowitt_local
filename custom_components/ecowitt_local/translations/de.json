@@ -55,16 +55,18 @@
     "step": {
       "init": {
         "title": "Optionen für Ecowitt Local",
-        "description": "Lege die Abfrageintervalle und Sensoroptionen fest.",
+        "description": "Lege die Abfrageintervalle und Sensoroptionen fest.\n\nNach dem Speichern lädt Home Assistant die Integration automatisch neu. Ein manueller Neustart ist nicht erforderlich.",
         "data": {
           "scan_interval": "Abfrageintervall für Live-Daten (Sekunden)",
           "mapping_interval": "Aktualisierungsintervall der Sensorzuordnung (Sekunden)",
-          "include_inactive": "Inaktive Sensoren einbeziehen"
+          "include_inactive": "Inaktive Sensoren einbeziehen",
+          "assign_wn32_to_ws90": "WN32-Außenwerte dem WS90-Gerät zuordnen"
         },
         "data_description": {
           "scan_interval": "Wie oft Live-Daten abgefragt werden (1–300 Sekunden)",
           "mapping_interval": "Wie oft die Sensorzuordnung aktualisiert wird (300–3600 Sekunden)",
-          "include_inactive": "Sensoren einbeziehen, die derzeit offline sind oder keine Daten liefern"
+          "include_inactive": "Sensoren einbeziehen, die derzeit offline sind oder keine Daten liefern",
+          "assign_wn32_to_ws90": "Wenn aktiviert, bleiben Außentemperatur, Luftfeuchtigkeit, Taupunkt und absolute Luftfeuchtigkeit den bisherigen WS90-Entitäten zugeordnet. Die Messwerte stammen weiterhin aus den vom Gateway priorisierten Außensensordaten."
         }
       }
     }
@@ -6398,6 +6400,9 @@
     },
     "temperature_humidity_sensor": {
       "name": "Ecowitt Temperatur-/Luftfeuchtigkeitssensor {hardware_id}"
+    },
+    "wh26_wn32_outdoor_temperature_humidity_sensor": {
+      "name": "Ecowitt WH26/WN32 Außentemperatur-/Luftfeuchtigkeitssensor {hardware_id}"
     },
     "wh69_weather_station": {
       "name": "Ecowitt WH69-Wetterstation {hardware_id}"

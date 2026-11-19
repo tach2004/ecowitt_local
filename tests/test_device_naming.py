@@ -41,8 +41,8 @@ def test_sensor_type_display_name():
         "WH45": "CO2 Air Quality Sensor",
         "wh46": "CO2 Air Quality Sensor",
         "WH25": "Indoor Station",
-        "WH26": "Outdoor Temperature/Humidity Sensor",
-        "wn32": "Outdoor Temperature/Humidity Sensor",
+        "WH26": "WH26/WN32 Outdoor Temperature/Humidity Sensor",
+        "wn32": "WH26/WN32 Outdoor Temperature/Humidity Sensor",
         "WN38": "Black Globe Temperature Sensor",
         "weather_station_ws90": "WS90 Weather Station",
         "weather_station_wh90": "WS90 Weather Station",
@@ -129,6 +129,10 @@ def test_device_name_ignores_non_channel_default_names():
         "WH57": ("Lightning", "Ecowitt Lightning Sensor A1"),
         "WH40": ("Rain", "Ecowitt Rain Sensor A1"),
         "WH90": ("WH90", "Ecowitt WS90 Weather Station A1"),
+        "WH26": (
+            "Temp & Humidity",
+            "Ecowitt WH26/WN32 Outdoor Temperature/Humidity Sensor A1",
+        ),
         "WH45": ("PM25 & PM10 & CO2", "Ecowitt CO2 Air Quality Sensor A1"),
         "WH85": ("Wind & Rain", "Ecowitt WS85 Wind & Rain Sensor A1"),
         "WH99": ("Future Sensor", "Ecowitt WH99 A1"),
@@ -154,3 +158,6 @@ def test_device_name_prefers_gateway_title():
     for empty in ("", "  ", None):
         info["live_title"] = empty
         assert device_name("FD", info) == "Ecowitt Temperature/Humidity Sensor FD"
+
+    wn32 = {"sensor_type": "WH26", "live_title": "Outdoor probe"}
+    assert device_name("A1", wn32) == "Outdoor probe"

@@ -55,16 +55,18 @@
     "step": {
       "init": {
         "title": "Opzioni Ecowitt Local",
-        "description": "Configura gli intervalli di polling e le opzioni dei sensori.",
+        "description": "Configura gli intervalli di polling e le opzioni dei sensori.\n\nHome Assistant ricarica automaticamente l’integrazione dopo il salvataggio. Non è necessario un riavvio manuale.",
         "data": {
           "scan_interval": "Intervallo Polling Dati Live (secondi)",
           "mapping_interval": "Intervallo Aggiornamento Mapping Sensori (secondi)",
-          "include_inactive": "Includi Sensori Inattivi"
+          "include_inactive": "Includi Sensori Inattivi",
+          "assign_wn32_to_ws90": "Assegna le misure esterne del WN32 al dispositivo WS90"
         },
         "data_description": {
           "scan_interval": "Ogni quanto interrogare il Gateway per i dati live (1-300 secondi)",
           "mapping_interval": "Ogni quanto aggiornare il mapping dei sensori (300-3600 secondi)",
-          "include_inactive": "Includi i sensori attualmente offline o senza dati"
+          "include_inactive": "Includi i sensori attualmente offline o senza dati",
+          "assign_wn32_to_ws90": "Se attiva, la temperatura esterna, l’umidità, il punto di rugiada e l’umidità assoluta restano associati alle entità WS90 esistenti. Le misure continuano a provenire dai dati del sensore esterno a cui il gateway dà priorità."
         }
       }
     }
@@ -6398,6 +6400,9 @@
     },
     "temperature_humidity_sensor": {
       "name": "Ecowitt sensore di temperatura/umidità {hardware_id}"
+    },
+    "wh26_wn32_outdoor_temperature_humidity_sensor": {
+      "name": "Sensore esterno di temperatura e umidità Ecowitt WH26/WN32 {hardware_id}"
     },
     "wh69_weather_station": {
       "name": "Ecowitt stazione meteorologica WH69 {hardware_id}"

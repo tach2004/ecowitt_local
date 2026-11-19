@@ -65,15 +65,17 @@ async def async_setup_entry(
         nonlocal gateway_entity_added
         sensor_data = coordinator.get_all_sensors()
 
-        # Get all hardware IDs with their associated sensors
-        hardware_sensors: Dict[str, List[Dict[str, Any]]] = {}
-        for entity_id, sensor_info in sensor_data.items():
+        primary_sensors: Dict[str, Dict[str, Any]] = {}
+        for sensor_info in sensor_data.values():
             hardware_id = sensor_info.get("hardware_id")
-            category = sensor_info.get("category")
-            if hardware_id and category == "sensor":
-                if hardware_id not in hardware_sensors:
-                    hardware_sensors[hardware_id] = []
-                hardware_sensors[hardware_id].append(sensor_info)
+            if not hardware_id:
+                continue
+            if sensor_info.get("category") == "sensor":
+                primary_sensors.setdefault(hardware_id, sensor_info)
+            elif "mapping_online" in sensor_info:
+                # Keep the existing default ID based on the outdoor temperature
+                # key even when this device has only diagnostics.
+                primary_sensors.setdefault(hardware_id, {"sensor_key": "0x02"})
 
         new_entities: List[Any] = []
 
@@ -83,12 +85,10 @@ async def async_setup_entry(
             new_entities.append(EcowittGatewayOnlineBinarySensor(coordinator))
 
         # Create online/offline binary sensors for each new hardware sensor
-        for hardware_id, sensors in hardware_sensors.items():
+        for hardware_id, primary_sensor in primary_sensors.items():
             if hardware_id in known_hardware_ids:
                 continue
             known_hardware_ids.add(hardware_id)
-            # Use the first sensor to get basic info
-            primary_sensor = sensors[0]
             new_entities.append(
                 EcowittSensorOnlineBinarySensor(
                     coordinator, hardware_id, primary_sensor
@@ -207,11 +207,18 @@ class EcowittSensorOnlineBinarySensor(
             return "sensor"
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         """Return true if the sensor is online."""
-        # Check if any sensor with this hardware ID has recent data
         sensor_data = self.coordinator.get_all_sensors()
+        hardware_id_sensor = sensor_data.get(
+            f"sensor.ecowitt_hardware_id_{self._hardware_id.lower()}", {}
+        )
+        if "mapping_online" in hardware_id_sensor:
+            # Fresh diagnostic records can also describe a disconnected WN32.
+            online: bool | None = hardware_id_sensor["mapping_online"]
+            return online
 
+        # Check if any sensor with this hardware ID has recent data
         for entity_id, sensor_info in sensor_data.items():
             if sensor_info.get("hardware_id") == self._hardware_id:
                 state = sensor_info.get("state")
